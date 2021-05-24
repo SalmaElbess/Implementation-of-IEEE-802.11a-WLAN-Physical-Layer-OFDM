@@ -10,16 +10,8 @@ function output_stream = demodulate(input_stream, mod_type, additional, output_t
 % Returns:
     % output_stream: the output stream (binary or symbols).
 %% ---------------------------------------------------------------- %%
-if strcmpi(mod_type, '16qam')
-  % In case of 16-QAM , the additional is the ref_demodualtor
-  [~,I] = min(conj(input_stream') - additional,[], 2);
-  demod_samples = (I-1)';
-elseif strcmpi(mod_type, '64qam')
-  % In case of 64-QAM , the additional is the ref_demodualtor
-  [~,I] = min(conj(input_stream') - additional,[], 2);
-  demod_samples = (I-1)';
-  elseif strcmpi(mod_type, 'qpsk')
-  % In case of QPSK , the additional is the ref_demodualtor
+if strcmpi(mod_type, '16qam') || strcmpi(mod_type, '64qam') ||  strcmpi(mod_type, 'qpsk')
+  % In case of QAM , the additional is the ref_demodualtor
   [~,I] = min(conj(input_stream') - additional,[], 2);
   demod_samples = (I-1)';
 elseif strcmpi(mod_type, 'bpsk')
