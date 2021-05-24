@@ -10,13 +10,13 @@ function [mapped_stream, additional] = modulate(input_stream, input_type, mod_ty
     % QAM, it's the needed reference vector for demodulation
 %% ---------------------------------------------------------------- %%
  % Get the number of symbols for mod_type
- if strcmpi(mod_type, 'bpsk')
+ if strcmpi(mod_type, 'BPSK')
     N = 2;
- elseif strcmpi(mod_type,'qpsk')
+ elseif strcmpi(mod_type,'QPSK')
     N = 4;
- elseif strcmpi(mod_type,'16qam')
+ elseif strcmpi(mod_type,'16QAM')
     N = 16;
- elseif strcmpi(mod_type,'64qam')
+ elseif strcmpi(mod_type,'64QAM')
     N = 64;
  end
 
@@ -39,11 +39,11 @@ if nargin < 4
    coding_scheme_vec = -1; %default value in case of no specific coding scheme 
 end
 
-   if strcmpi(mod_type, '16qam') || strcmpi(mod_type, '64qam') || strcmpi(mod_type, 'qpsk')
+   if strcmpi(mod_type, '16QAM') || strcmpi(mod_type, '64QAM') || strcmpi(mod_type, 'QPSK')
       Kmod = 1/sqrt(10); %IEEE-11.802a standard
       [mapped_stream, additional] = modulate_QAM(N, stream, coding_scheme_vec);
       mapped_stream = mapped_stream * Kmod;
-   elseif strcmpi(mod_type, 'bpsk')
+   elseif strcmpi(mod_type, 'BPSK')
       mapped_stream = stream; 
       mapped_stream(mapped_stream == 0) = -1;
    else
