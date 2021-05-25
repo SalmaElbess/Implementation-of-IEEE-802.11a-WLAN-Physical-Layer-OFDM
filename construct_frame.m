@@ -12,21 +12,21 @@ function [preamble, signal, data] = construct_frame(data, mod_type, CR)
     L = [1 1 -1 -1 1 1 -1 1 -1 1 1 1 1 1 1 -1 -1 1 1 -1 1 -1 1 1 1 1 1 -1 -1 1 1 -1 1 -1 1 -1 -1 -1 -1 -1 1 1 -1 -1 1 -1 1 -1 1 1 1 1];
 
     % Rate
-    if strcmp(mod_type,'BPSK') && CR == 1/2
+    if strcmpi(mod_type,'BPSK') && CR == 1/2
         R='1101';
-    elseif strcmp(mod_type,'BPSK') && CR == 3/4
+    elseif strcmpi(mod_type,'BPSK') && CR == 3/4
         R='1111';
-    elseif strcmp(mod_type,'QPSK') && CR == 1/2
+    elseif strcmpi(mod_type,'QPSK') && CR == 1/2
         R='0101';
-    elseif strcmp(mod_type,'QPSK') && CR == 3/4
+    elseif strcmpi(mod_type,'QPSK') && CR == 3/4
         R='0111';
-    elseif strcmp(mod_type,'16QAM') && CR == 1/2
+    elseif strcmpi(mod_type,'16QAM') && CR == 1/2
         R='1001';
-    elseif strcmp(mod_type,'16QAM') && CR == 3/4
+    elseif strcmpi(mod_type,'16QAM') && CR == 3/4
         R='1011';
-    elseif strcmp(mod_type,'64QAM') && CR == 2/3
+    elseif strcmpi(mod_type,'64QAM') && CR == 2/3
         R='0001';
-    elseif strcmp(mod_type,'64QAM') && CR == 3/4
+    elseif strcmpi(mod_type,'64QAM') && CR == 3/4
         R='0011';    
     end
 
