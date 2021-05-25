@@ -32,10 +32,10 @@ for r=1:size(data,1)
     final_data(r,pilots_indecies) = tx_pilots;
     final_data(r,data_indecies) = data(r,:);
 end
- final_data = reshape(conj(final_data'), 1, []); % READY for transmission
-
+ final_data = reshape(conj(final_data'), 1, []);
+ % FINALLY, concatenate with the preamble and signal
+ stream = [preamble, signal, final_data];  % READY for transmission
 %% OFDM
-stream = final_data; %transition
 %serial to parallel conversion
 parallel_stream = reshape(stream,N,[]);
 %IFFT module
