@@ -7,7 +7,7 @@ function [mapped_stream, additional] = modulate(input_stream, input_type, mod_ty
 % Returns:
     % mapped_stream: the output modulated complex symbols
     % additional: additional information depending on mod_type. In case of
-    % QAM, it's the needed reference vector for demodulation
+                 % QAM, it's the needed reference vector for demodulation
 %% ---------------------------------------------------------------- %%
  % Get the number of symbols for mod_type
  if strcmpi(mod_type, 'BPSK')
@@ -41,8 +41,7 @@ end
 
    if strcmpi(mod_type, '16QAM') || strcmpi(mod_type, '64QAM') || strcmpi(mod_type, 'QPSK')
       Kmod = 1/sqrt(10); %IEEE-11.802a standard
-      [mapped_stream, additional] = modulate_QAM(N, stream, coding_scheme_vec);
-      mapped_stream = mapped_stream * Kmod;
+      [mapped_stream, additional] = modulate_QAM(N, stream, Kmod, coding_scheme_vec);
    elseif strcmpi(mod_type, 'BPSK')
       mapped_stream = stream; 
       mapped_stream(mapped_stream == 0) = -1;

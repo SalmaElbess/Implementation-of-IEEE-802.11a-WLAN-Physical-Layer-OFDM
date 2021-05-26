@@ -1,18 +1,36 @@
-function output_stream = demodulate(input_stream, mod_type, additional, output_type)
+function output_stream = demodulate(input_stream, mod_type, output_type, coding_scheme_vec)
 %% demodulate: This function perform demodulation for input complex symbols with multiple modulation schemes
 % Parameters: 
     % input_stream: modulated complex symbols
     % mod_type: the needed modulation schemce (N-QAM, PSK, QPSK)
-    % additional: additional information depending on mod_type. In case of
-    % QAM, it's the needed reference vector for demodulation
     % output_type: the type of the output stream (symbols, binary)
+     % coding_scheme_vec: -1 in case of no specific coding/decoding scheme
+     %               Otherwise, the coded symbols should be written a
+     %               columns by a column (such as reshape function
+     %               behavior)
     
 % Returns:
     % output_stream: the output stream (binary or symbols).
 %% ---------------------------------------------------------------- %%
-if strcmpi(mod_type, '16QAM') || strcmpi(mod_type, '64QAM') ||  strcmpi(mod_type, 'QPSK')
-  % In case of QAM , the additional is the ref_demodualtor
-  [~,I] = min(conj(input_stream') - additional,[], 2);
+ %-- check if coding scheme is passed
+if nargin < 4
+   coding_scheme_vec = -1; %default value in case of no specific coding scheme 
+end
+
+if strcmpi(mod_type, '16QAM')
+  K = 1/sqrt(10);
+  ref_demod = QAM_mapping_reference(16,coding_scheme_vec,K);
+  [~,I] = min(conj(input_stream') - ref_demod,[], 2);
+  demod_samples = (I-1)';
+elseif strcmpi(mod_type, '64QAM')
+    K = 1/sqrt(10);
+  ref_demod = QAM_mapping_reference(64,coding_scheme_vec,K);
+  [~,I] = min(conj(input_stream') - ref_demod,[], 2);
+  demod_samples = (I-1)';
+elseif strcmpi(mod_type, 'QPSK')
+  K = 1/sqrt(10);
+  ref_demod = QAM_mapping_reference(4,coding_scheme_vec,K);
+  [~,I] = min(conj(input_stream') - ref_demod,[], 2);
   demod_samples = (I-1)';
 elseif strcmpi(mod_type, 'BPSK')
   demod_samples = zeros(size(input_stream));

@@ -1,4 +1,4 @@
-function [preamble, signal, data, ref_demod] = construct_frame(data, mod_type, CR)
+function [preamble, signal, data] = construct_frame(data, mod_type, CR)
 % ARGUMENTS
     % data: 1000 byte of binary data to be put into a frame
     % mod_type: the needed modulation schemce (N-QAM, BPSK, QPSK)
@@ -53,7 +53,7 @@ function [preamble, signal, data, ref_demod] = construct_frame(data, mod_type, C
     signal = conv_encoder(signal, 1/2);
     signal = modulate(signal, 'binary', 'bpsk');
     data = conv_encoder(data, CR);
-    [data, ref_demod] = modulate(data, 'binary', mod_type);
+    [data,~] = modulate(data, 'binary', mod_type);
     %frame = [S S L L str2num(R')' str2num(len')' str2num(parity) str2num(tail')' str2num(pad')' data];
 end
 
