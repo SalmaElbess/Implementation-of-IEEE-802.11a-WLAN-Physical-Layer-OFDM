@@ -8,12 +8,11 @@ function with_cyclic_guards = WiFi_transmitter(bin_data, mod_type, rate, Nc, gua
     % guard_len: Cyclic prefix length
 % Returns:
     % with_cyclic_guards: the output OFDM complex symbols to be sent
-    % ref_demod: a needed reference vector for demodulation in case of QAM
 
 %% --(1) Standards Specifications 
 zero_indecies = cat(2, 1, (28:38));   %indecies of zeroes
 pilots_indecies = [44, 57, 8, 22];
-data_indecies = setdiff(setdiff((1:64), pilots_indecies), zero_indecies);
+data_indecies = setdiff(setdiff((1:Nc), pilots_indecies), zero_indecies);
 
 %% --(2) Construct the frame
 %input_length = length(bin_data);
