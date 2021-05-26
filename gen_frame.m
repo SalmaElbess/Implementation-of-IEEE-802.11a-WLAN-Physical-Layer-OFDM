@@ -73,4 +73,9 @@ end
 out_coded = demodulate(rx_data, mod_type, ref_demod, 'binary');
  % given that I know the rate and data length (2000)
 out_coded = out_coded(1:2000);
-
+ % Viterbi decoder
+trellis = poly2trellis(7,[133 171]);
+tbdepth = 2*(log2(trellis.numStates)/(1-rate)); % Traceback depth for Viterbi decoder
+out_decoded = vitdec(out_coded,trellis,tbdepth,'trunc','hard');
+%% Check
+BER = sum(out_decoded ~= bin_data)/length(out_decoded)  
