@@ -43,7 +43,6 @@ end
 rx_length = 1000;          %TODO: must be extracted from signal 
 rx_rate = 1/2;             %TODO: must be extracted from signal
 mod_type = '16qam';        %TODO: must be extracted from signal
-
 %% --(6) Data symbols demapping and Padding removal
 out_coded = demodulate(rx_data_equalized, mod_type, 'binary');
 out_coded = out_coded(1:rx_length/rx_rate); % Padding removal

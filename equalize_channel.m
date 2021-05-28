@@ -5,7 +5,7 @@ if equalization_method == 'ZF'
     data_channel_gains = channel_gains(data_indecies);
     equalized_data = zeros(size(data));
     for i = 1:48:length(data)
-        equalized_data(i:i+47) = data(i:i+47).*data_channel_gains;
+        equalized_data(i:i+47) = data(i:i+47)./data_channel_gains;
     end
 end
 end
