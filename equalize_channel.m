@@ -8,5 +8,4 @@ if equalization_method == 'ZF'
         equalized_data(i:i+47) = data(i:i+47).*data_channel_gains;
     end
 end
-sum(abs(equalized_data - data) )
 end
