@@ -19,14 +19,14 @@ data_indecies = setdiff(setdiff((1:Nc), pilots_indecies), zero_indecies);
 [temp_preamble, temp_signal, temp_data] = construct_frame(bin_data, mod_type, rate);
 
 %% --(3) Preamble & Signal post-processing
-temp_preamble = reshape(temp_preamble,[],4)'; 
+temp_preamble = reshape(temp_preamble,[],4).'; 
 preamble = zeros(4,64); signal = zeros(1,64);
 
 rest_indecies = setdiff((1:64), zero_indecies);
 for i=1:4
-    preamble(rest_indecies) = temp_preamble(i,:);
+    preamble(i,rest_indecies) = temp_preamble(i,:);
 end
-preamble = reshape(preamble',1,[]);
+preamble = reshape(preamble.',1,[]);
 signal(rest_indecies) = temp_signal;
 
 %% --(4) Data post-processing
