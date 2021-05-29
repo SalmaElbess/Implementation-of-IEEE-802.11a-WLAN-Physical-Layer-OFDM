@@ -28,7 +28,6 @@ for i=1:4
 end
 preamble = reshape(preamble.',1,[]);
 signal(rest_indecies) = temp_signal;
-
 %% --(4) Data post-processing
 n_data = length(data_indecies);
 % -- padding

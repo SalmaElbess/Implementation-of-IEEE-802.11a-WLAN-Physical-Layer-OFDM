@@ -40,16 +40,42 @@ end
   % ---
   rx_data_equalized = equalize_channel(rx_data,channel_gains,'ZF');
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
-rx_length = 1000;          %TODO: must be extracted from signal 
-rx_rate = 1/2;             %TODO: must be extracted from signal
-mod_type = '16qam';        %TODO: must be extracted from signal
+useful_ind = setdiff([1:64],zero_indecies);
+rec_signal=rec_signal(useful_ind);
+rec_signal = demodulate(rec_signal, 'bpsk', 'binary');
+rec_signal_decoded = viterbi_decoder(rec_signal,1/2);
+R=num2str(rec_signal_decoded(1:4)')';
+rx_length = bin2dec(num2str(rec_signal_decoded(5:16)));
+switch R
+    case '1101'
+        mod_type = 'BPSK';
+        rx_rate = 1/2;
+    case '1111'
+        mod_type = 'BPSK';
+        rx_rate = 3/4;
+    case '0101'
+        mod_type = 'QPSK';
+        rx_rate = 1/2;
+    case '0111'
+        mod_type = 'QPSK';
+        rx_rate = 3/4;
+    case '1001'
+        mod_type = '16QAM';
+        rx_rate = 1/2;
+    case '1011'
+        mod_type = '16QAM';
+        rx_rate = 3/4;
+    case '0001'
+        mod_type = '64QAM';
+        rx_rate = 2/3;
+    case '0011'
+        mod_type = '64QAM';
+        rx_rate = 3/4;
+end
 %% --(6) Data symbols demapping and Padding removal
 out_coded = demodulate(rx_data_equalized, mod_type, 'binary');
-out_coded = out_coded(1:rx_length/rx_rate); % Padding removal
+out_coded = out_coded(1:8*rx_length/rx_rate); % Padding removal
 
  %% --(7) Viterbi Decoding  
-trellis = poly2trellis(7,[133 171]);
-tbdepth = round(2*(log2(trellis.numStates)/(1-rx_rate))); % Traceback depth for Viterbi decoder
-out_decoded = vitdec(out_coded,trellis,tbdepth,'trunc','hard');
-
+out_decoded = viterbi_decoder(out_coded,rx_rate);
 end
