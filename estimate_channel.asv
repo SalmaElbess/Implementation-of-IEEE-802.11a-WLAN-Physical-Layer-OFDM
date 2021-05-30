@@ -4,11 +4,13 @@ function channel_gains = estimate_channel(rec_preamble,estimation_method)
 %
 %inputs:
 %       rec_preamble: array of shape 1*256 containing the received preamble
-%       symbols 
-%       estimation_method:
+%       symbols
+%       channel_gains: array of shape 1*52 of the channel estimated gains.
+%       it includes the pilots channel gains. 
+%       equalization_method:
 %output:
-%       channel_gains: array of shape 1*52 of the channel gains(data gains 
-%       and pilots gains).
+%       equalized_data: array of equalized data. Each OFDM symbol isnside
+%       this array is 48 subcarrier long.
 
     if estimation_method == 'ZF'
     %Constructing ture preamble values
@@ -18,11 +20,8 @@ function channel_gains = estimate_channel(rec_preamble,estimation_method)
     %get the long recieved preamble symbols
     long_rec_preamble_1 = rec_preamble(rest_indecies + 64*2);
     long_rec_preamble_2 = rec_preamble(rest_indecies + 64*3);
-    %estimate from the first long recieved preamble symbol
-    h1 = long_rec_preamble_1./L; 
-    %estimate from the second long recieved preamble symbol
+    h1 = long_rec_preamble_1./L;
     h2 = long_rec_preamble_2./L;
-    %average estimate of the channel gains
     channel_gains = (h1+h2)./2;
     end
 end
