@@ -16,19 +16,19 @@ data = reshape(dec2bin(data, 8).'-'0',1,[]);
 
 %% The main loop
 out_decoded=[];
-step = 1032*8;
-for i=1:step:length(data)
-    frame = data(i:min(length(data),i+step-1)); 
+for i=1:8000:length(data)
+    frame = data(i:min(length(data),i+7999)); 
     % Tansmitter
     tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
     % Channel
     Rx_frame = conv(tx_frame,conj(h));
     Rx_frame = Rx_frame(1:end-length(h)+1);
     % Receiver
-    decoded = WiFi_receiver(Rx_frame, Nc, guard_len);
-    out_decoded = [out_decoded decoded(1:length(frame))];
+    decoded = WiFi_receiver(Rx_frame, Nc, guard_len)
+    out_decoded = [out_decoded];
 end
 %% Check
+out_decoded = out_decoded(1:length(data));
 BER = sum(out_decoded ~= data)/length(out_decoded)
 
 FileID=fopen('rec_test_file_1.txt','w');

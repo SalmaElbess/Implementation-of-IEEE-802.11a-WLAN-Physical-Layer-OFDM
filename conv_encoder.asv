@@ -13,13 +13,11 @@ switch rate
         codedData = convenc(data,trellis);
     case 3/4
         punctpat = [1 1 1 0 0 1];
-        if rem(length(data)*2,length(punctpat))
-            padding = length(punctpat)-rem(length(data)*2,length(punctpat));
-            data = [data zeros(1,padding/2)];
-        end
+        padding = length(punctpat)-rem(length(data)*2,length(punctpat));
+        data = [data zeros(1,padding/2)];
         codedData = convenc(data,trellis,punctpat);
-        %truncate = length(data)/rate;
-        %codedData = codedData(1:truncate);
+        truncate = length(data)/rate;
+        codedF
     case 2/3
         punctpat = [1 1 1 0];
         codedData = convenc(data,trellis,punctpat);
