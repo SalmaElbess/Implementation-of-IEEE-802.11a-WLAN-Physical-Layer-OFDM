@@ -40,7 +40,13 @@ if nargin < 4
 end
 
    if strcmpi(mod_type, '16QAM') || strcmpi(mod_type, '64QAM') || strcmpi(mod_type, 'QPSK')
-      Kmod = 1/sqrt(10); %IEEE-11.802a standard
+      if strcmpi(mod_type, 'QPSK') 
+          Kmod = 1/sqrt(2); %IEEE-11.802a standard
+      elseif strcmpi(mod_type, '16QAM')
+          Kmod = 1/sqrt(10); %IEEE-11.802a standard
+      else
+          Kmod = 1/sqrt(42); %IEEE-11.802a standard
+      end
       [mapped_stream, additional] = modulate_QAM(N, stream, Kmod, coding_scheme_vec);
    elseif strcmpi(mod_type, 'BPSK')
       mapped_stream = stream; 
@@ -49,5 +55,5 @@ end
        disp('Invalid modulation type');
        return
    end
-   additional = additional * Kmod;
+   % additional = additional * Kmod;
 end

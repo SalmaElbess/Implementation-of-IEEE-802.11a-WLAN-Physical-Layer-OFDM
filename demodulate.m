@@ -16,19 +16,18 @@ function output_stream = demodulate(input_stream, mod_type, output_type, coding_
 if nargin < 4
    coding_scheme_vec = -1; %default value in case of no specific coding scheme 
 end
-
 if strcmpi(mod_type, '16QAM')
   K = 1/sqrt(10);
   ref_demod = QAM_mapping_reference(16,coding_scheme_vec,K);
   [~,I] = min(conj(input_stream') - ref_demod,[], 2);
   demod_samples = (I-1)';
 elseif strcmpi(mod_type, '64QAM')
-    K = 1/sqrt(10);
+    K = 1/sqrt(42);
   ref_demod = QAM_mapping_reference(64,coding_scheme_vec,K);
   [~,I] = min(conj(input_stream') - ref_demod,[], 2);
   demod_samples = (I-1)';
 elseif strcmpi(mod_type, 'QPSK')
-  K = 1/sqrt(10);
+  K = 1/sqrt(2);
   ref_demod = QAM_mapping_reference(4,coding_scheme_vec,K);
   [~,I] = min(conj(input_stream') - ref_demod,[], 2);
   demod_samples = (I-1)';
@@ -37,7 +36,6 @@ elseif strcmpi(mod_type, 'BPSK')
   demod_samples(input_stream > 0 ) = 1;
 end
   output_stream = demod_samples;
- 
 % If the needed output format is binary, convert to binary data.
  if strcmpi(output_type, 'binary')
    output_stream = de2bi(output_stream, 'left-msb');
