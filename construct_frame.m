@@ -22,8 +22,10 @@ function [preamble, signal, data] = construct_frame(data, mod_type, CR)
     % Rate
     if strcmpi(mod_type,'BPSK') && CR == 1/2
         R='1101';
+        gray_scheme = -1;
     elseif strcmpi(mod_type,'BPSK') && CR == 3/4
         R='1111';
+        gray_scheme = -1;
     elseif strcmpi(mod_type,'QPSK') && CR == 1/2
         R='0101';
         gray_scheme = [1 0 3 2];
