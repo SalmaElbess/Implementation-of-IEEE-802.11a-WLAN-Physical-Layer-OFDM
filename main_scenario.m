@@ -2,7 +2,7 @@ clear; clc; close all;
 
 %% Main Scenario script
 Nc = 64; guard_len = 16; % OFDM parameters
-rate= 2/3; mod_type = '64QAM';
+rate= 1/2; mod_type = 'QPSK';
 h = [0.8208 + 0.2052*1i, 0.4104 + 0.1026*1i, 0.2052 + 0.2052*1i, 0.1026 + 0.1026*1i]; %channel
 
 FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  

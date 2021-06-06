@@ -42,10 +42,10 @@ end
 
 %% TODO#2: --(3) Channel Estimation
   % --- using rec_preamble
-  channel_gains = estimate_channel(rec_preamble,'ZF');
+  channel_gains = estimate_channel(rec_preamble,'WE');
 %% TODO#3: --(4) Channel Equalization
   % ---
-  rx_data_equalized = equalize_channel(rx_data,channel_gains,'ZF');
+  rx_data_equalized = equalize_channel(rx_data,channel_gains,'WE');
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
 useful_ind = setdiff([1:64],zero_indecies);
 rec_signal= rec_signal(useful_ind);

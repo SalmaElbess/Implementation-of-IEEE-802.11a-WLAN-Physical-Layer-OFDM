@@ -30,13 +30,13 @@ channel_gains = (h1+h2)./2;
 else
     M = 4;
     channel_gains=zeros(M,1);
-    preamble=[long_rec_preamble_1;long_rec_preamble_2];
+    preamble=[long_rec_preamble_1 long_rec_preamble_2];
     for k=1:2
         desired = L;
         M = 4;
         mu=0.01;
         w = zeros(M,1);
-        u=[0 0 0 preamble(k,:)];
+        u=[0 0 0 preamble];
         for i=1:length(u)-3
             d_hat = w'*[u(i+3);u(i+2);u(i+1);u(i)];
             e = desired(i) - d_hat;
