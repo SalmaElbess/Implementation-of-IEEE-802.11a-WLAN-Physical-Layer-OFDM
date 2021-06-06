@@ -25,7 +25,7 @@ if strcmpi(equalization_method,'ZF')
         equalized_data(i:i+47) = data(i:i+47)./data_channel_gains;
     end
 else
-    equalized_data=conv(data,channel_gains);
+    equalized_data=conv(data,conj(channel_gains));
     equalized_data=equalized_data(1:length(data));
 end
 end
