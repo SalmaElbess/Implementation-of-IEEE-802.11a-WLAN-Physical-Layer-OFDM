@@ -1,4 +1,4 @@
-function out_decoded = WiFi_receiver(input_stream, Nc, guard_len, estimation_method)
+function [out_decoded, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, estimation_method)
 %% WiFi_receiver: This function performs all required steps to receive complex symbols and convert them to binary data using WiFi
 % Parameters: 
     % input_stream: the input OFDM complex symbols to received

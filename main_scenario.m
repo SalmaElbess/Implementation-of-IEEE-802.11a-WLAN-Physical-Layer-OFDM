@@ -2,8 +2,6 @@ clear; clc; close all;
 
 %% Main Scenario script
 Nc = 64; guard_len = 16; % OFDM parameters
-rate= 3/4; mod_type = '64QAM';
-estimation_method = 'WE';
 h = [0.8208 + 0.2052*1i, 0.4104 + 0.1026*1i, 0.2052 + 0.2052*1i, 0.1026 + 0.1026*1i]; %channel
 
 FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  
@@ -18,6 +16,7 @@ data = reshape(dec2bin(data, 8).'-'0',1,[]);
 %% Without AWGN
 out_decoded=[];
 step = 1032*8;
+rate= 1/2; mod_type = 'QPSK'; estimation_method = 'WE';
 for i=1:step:length(data)
     frame = data(i:min(length(data),i+step-1)); 
     % Tansmitter
@@ -26,7 +25,7 @@ for i=1:step:length(data)
     Rx_frame = conv(tx_frame,conj(h));
     Rx_frame = Rx_frame(1:end-length(h)+1);
     % Receiver
-    decoded = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method);
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method);
     out_decoded = [out_decoded decoded(1:length(frame))];
 end
 % Check
@@ -39,32 +38,68 @@ fclose(FileID);
 step = 1032*8;
 snr_dbs = (0:0.5:10);
 rate= 3/4; mod_type = '64QAM';
-BERs = [];
+BERs_WE = [];
+BERs_ZF = [];
 for snr_db = snr_dbs
-    out_decoded=[];
+    out_decoded_WE=[]; out_decoded_ZF=[];
         for i=1:step:length(data)
             frame = data(i:min(length(data),i+step-1)); 
             % Tansmitter
             tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             % Channel
-            EbN0 = 10^(snr_db/10);
-            EavN0 = log2(64)*EbN0;
+            %EbN0 = 10^(snr_db/10);
             Ps = sum(abs(tx_frame).^2)/length(tx_frame);
-            var = Ps/(2*EavN0);
+            bps = (4*64*2 + 64*2 + length(frame)*log2(64))/length(tx_frame); %bits per symbol
+            No = Ps/(bps*10^(snr_db/10));
+            var = No/2;
             noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
             awg_noise = sqrt(var)*noiseq;
             tx_frame = tx_frame + awg_noise;
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             % Receiver
-            decoded = WiFi_receiver(Rx_frame, Nc, guard_len);
-            out_decoded = [out_decoded decoded(1:length(frame))];
+            [decoded_WE, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
+            [decoded_ZF, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
+            
+            out_decoded_WE = [out_decoded_WE decoded_WE(1:length(frame))];
+            out_decoded_ZF = [out_decoded_ZF decoded_ZF(1:length(frame))];
         end
         % Check
-        BER = sum(out_decoded ~= data)/length(out_decoded);
-    BERs = cat(2, BERs, BER);
+        BER_ZF = sum(out_decoded_ZF ~= data)/length(out_decoded_ZF);
+        BER_WE = sum(out_decoded_WE ~= data)/length(out_decoded_WE);
+    BERs_ZF = cat(2, BERs_ZF, BER_ZF);
+    BERs_WE = cat(2, BERs_WE, BER_WE);
 end
-
+semilogy(BERs_ZF);
+hold on;
+semilogy(BERs_WE);
+hold off;
+title('BER for ZF equalizer VS Weiner equalizer with 64QAM modulation with code rate = 3/4');
+xlabel('snr (dB)'); ylabel('Bit error rate');
+legend('ZF equalizer', 'Weiner equalizer');
+%% 4.c) Constellation diagram of the received symbols after equalization using the ZF equalizer
+snr = 8; % in dB
+out_decoded_WE=[]; out_decoded_ZF=[];
+    for i=1:step:length(data)
+            frame = data(i:min(length(data),i+step-1)); 
+            % Tansmitter
+            tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
+            % Channel
+            Ps = sum(abs(tx_frame).^2)/length(tx_frame);
+            bps = (4*64*2 + 64*2 + length(frame)*log2(64))/length(tx_frame); %bits per symbol
+            No = Ps/(bps*10^(snr/10));
+            var = No/2;
+            noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
+            awg_noise = sqrt(var)*noiseq;
+            tx_frame = tx_frame + awg_noise;
+            Rx_frame = conv(tx_frame,conj(h));
+            Rx_frame = Rx_frame(1:end-length(h)+1);
+            % Receiver
+            [~, rx_data_WE] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
+            [~, rx_data_ZF] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
+    end
+   scatterplot(rx_data_WE,[],[], 'g.');
+   scatterplot(rx_data_ZF,[],[], 'g.');
 %% Comparison between the BER performance of the ZF equalizer, and the Weiner equalizer with AWGN Channel
 step = 1032*8;
 snr_dbs = (0:0.5:8);
