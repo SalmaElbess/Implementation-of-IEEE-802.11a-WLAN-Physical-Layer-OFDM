@@ -2,7 +2,8 @@ clear; clc; close all;
 
 %% Main Scenario script
 Nc = 64; guard_len = 16; % OFDM parameters
-rate= 1/2; mod_type = 'QPSK';
+rate= 3/4; mod_type = '64QAM';
+estimation_method = 'WE';
 h = [0.8208 + 0.2052*1i, 0.4104 + 0.1026*1i, 0.2052 + 0.2052*1i, 0.1026 + 0.1026*1i]; %channel
 
 FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  
@@ -25,7 +26,7 @@ for i=1:step:length(data)
     Rx_frame = conv(tx_frame,conj(h));
     Rx_frame = Rx_frame(1:end-length(h)+1);
     % Receiver
-    decoded = WiFi_receiver(Rx_frame, Nc, guard_len);
+    decoded = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method);
     out_decoded = [out_decoded decoded(1:length(frame))];
 end
 % Check
@@ -34,6 +35,35 @@ BER = sum(out_decoded ~= data)/length(out_decoded)
 FileID=fopen('rec_test_file_1.txt','w');
 fprintf(FileID,'%c',char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))');
 fclose(FileID);
+%% 4.b) Comparison between the BER performance of the ZF equalizer, and the Weiner equalizer (Floating Point)
+step = 1032*8;
+snr_dbs = (0:0.5:10);
+rate= 3/4; mod_type = '64QAM';
+BERs = [];
+for snr_db = snr_dbs
+    out_decoded=[];
+        for i=1:step:length(data)
+            frame = data(i:min(length(data),i+step-1)); 
+            % Tansmitter
+            tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
+            % Channel
+            EbN0 = 10^(snr_db/10);
+            EavN0 = log2(64)*EbN0;
+            Ps = sum(abs(tx_frame).^2)/length(tx_frame);
+            var = Ps/(2*EavN0);
+            noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
+            awg_noise = sqrt(var)*noiseq;
+            tx_frame = tx_frame + awg_noise;
+            Rx_frame = conv(tx_frame,conj(h));
+            Rx_frame = Rx_frame(1:end-length(h)+1);
+            % Receiver
+            decoded = WiFi_receiver(Rx_frame, Nc, guard_len);
+            out_decoded = [out_decoded decoded(1:length(frame))];
+        end
+        % Check
+        BER = sum(out_decoded ~= data)/length(out_decoded);
+    BERs = cat(2, BERs, BER);
+end
 
 %% Comparison between the BER performance of the ZF equalizer, and the Weiner equalizer with AWGN Channel
 step = 1032*8;

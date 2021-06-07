@@ -1,4 +1,4 @@
-function out_decoded = WiFi_receiver(input_stream, Nc, guard_len)
+function out_decoded = WiFi_receiver(input_stream, Nc, guard_len, estimation_method)
 %% WiFi_receiver: This function performs all required steps to receive complex symbols and convert them to binary data using WiFi
 % Parameters: 
     % input_stream: the input OFDM complex symbols to received
@@ -6,7 +6,9 @@ function out_decoded = WiFi_receiver(input_stream, Nc, guard_len)
     % guard_len: Cyclic prefix length
 % Returns:
     % out_decoded: the output binary data received
-    
+if nargin < 4
+   estimation_method = 'ZF'; 
+end
  %% --(1) Standards Specifications 
 zero_indecies = cat(2, 1, (28:38));   %indecies of zeroes
 pilots_indecies = [44, 57, 8, 22];
@@ -42,10 +44,10 @@ end
 
 %% TODO#2: --(3) Channel Estimation
   % --- using rec_preamble
-  channel_gains = estimate_channel(rec_preamble,'WE');
+  channel_gains = estimate_channel(rec_preamble,estimation_method);
 %% TODO#3: --(4) Channel Equalization
   % ---
-  rx_data_equalized = equalize_channel(rx_data,channel_gains,'WE');
+  rx_data_equalized = equalize_channel(rx_data,channel_gains,estimation_method);
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
 useful_ind = setdiff([1:64],zero_indecies);
 rec_signal= rec_signal(useful_ind);
