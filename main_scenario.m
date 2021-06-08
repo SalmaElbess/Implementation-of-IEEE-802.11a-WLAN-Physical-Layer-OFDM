@@ -34,7 +34,7 @@ BER = sum(out_decoded ~= data)/length(out_decoded)
 FileID=fopen('rec_test_file_1.txt','w');
 fprintf(FileID,'%c',char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))');
 fclose(FileID);
-%% 4.b) Comparison between the BER performance of the ZF equalizer, and the Weiner equalizer (Floating Point)
+%% 4.b) Comparison between the ZF equalizer, and the Weiner equalizer (Floating Point)
 step = 1032*8;
 snr_dbs = (0:0.5:10);
 rate= 3/4; mod_type = '64QAM';
@@ -49,7 +49,7 @@ for snr_db = snr_dbs
             % Channel
             %EbN0 = 10^(snr_db/10);
             Ps = sum(abs(tx_frame).^2)/length(tx_frame);
-            bps = (4*64*2 + 64*2 + length(frame)*log2(64))/length(tx_frame); %bits per symbol
+            bps = (4*64+4*guard_len + 64*2+guard_len*2 + length(frame)*log2(64)+ceil(length(frame)/Nc)*guard_len*log2(64))/length(tx_frame); %bits per symbol
             No = Ps/(bps*10^(snr_db/10));
             var = No/2;
             noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
@@ -77,8 +77,9 @@ hold off;
 title('BER for ZF equalizer VS Weiner equalizer with 64QAM modulation with code rate = 3/4');
 xlabel('snr (dB)'); ylabel('Bit error rate');
 legend('ZF equalizer', 'Weiner equalizer');
-%% 4.c) Constellation diagram of the received symbols after equalization using the ZF equalizer
-snr = 8; % in dB
+%% 4.c) Constellation diagram of the received symbols after equalization using the ZF equalizer and weiner equalizer
+snr = 12; % in dB
+rate= 3/4; mod_type = '64QAM';
 out_decoded_WE=[]; out_decoded_ZF=[];
     for i=1:step:length(data)
             frame = data(i:min(length(data),i+step-1)); 
@@ -86,7 +87,7 @@ out_decoded_WE=[]; out_decoded_ZF=[];
             tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             % Channel
             Ps = sum(abs(tx_frame).^2)/length(tx_frame);
-            bps = (4*64*2 + 64*2 + length(frame)*log2(64))/length(tx_frame); %bits per symbol
+            bps = (4*64+4*guard_len + 64*2+guard_len*2 + length(frame)*log2(64)+ceil(length(frame)/Nc)*guard_len*log2(64))/length(tx_frame); %bits per symbol
             No = Ps/(bps*10^(snr/10));
             var = No/2;
             noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
@@ -95,20 +96,20 @@ out_decoded_WE=[]; out_decoded_ZF=[];
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             % Receiver
-            [~, rx_data_WE] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
-            [~, rx_data_ZF] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
+            [~, rx_syms_WE] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
+            [~, rx_syms_ZF] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
     end
-   scatterplot(rx_data_WE,[],[], 'g.');
-   scatterplot(rx_data_ZF,[],[], 'g.');
+   scatterplot(rx_syms_WE,[],[], 'g.');
+   scatterplot(rx_syms_ZF,[],[], 'g.');
 %% 4.e) Comparison between the BER performance of all supported rates using the floating-point implementation.
-snr_dbs = (0:0.5:8);
+snr_dbs = (0:0.5:3);
 n_experiments = 1;
 rates= [1/2, 3/4, 1/2, 3/4, 1/2, 3/4, 2/3, 3/4];
 Ms = [2, 2, 4, 4, 16, 16, 64, 64];
 mod_types = ["BPSK","BPSK","QPSK", "QPSK", "16QAM", "16QAM", "64QAM", "64QAM"];
-bpsyms = [1,1,2,2,4,4,6,6];
+colors = ["#964B00",'b','g','r','y','k','m','c'];
 for j=1:length(rates)
- rate = rates(j); mod_type=mod_types(j); bps = Ms(j); 
+ rate = rates(j); mod_type=mod_types(j); M = Ms(j); 
  BERs = [];
  for snr_db = snr_dbs
     BER = 0;
@@ -120,8 +121,8 @@ for j=1:length(rates)
             tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             % Channel
             Ps = sum(abs(tx_frame).^2)/length(tx_frame);
-            bps = (4*64*2 + 64*2 + length(frame)*log2(64))/length(tx_frame); %bits per symbol
-            No = Ps/(bps*10^(snr/10));
+            bps = (4*64+4*guard_len + 64*2+guard_len*2 + length(frame)*log2(64)+ceil(length(frame)/Nc)*guard_len*log2(64))/length(tx_frame); %bits per symbol
+            No = Ps/(bps*10^(snr_db/10));
             var = No/2;
             noiseq = randn(1,length(tx_frame)) + 1j*randn(1,length(tx_frame));
             awg_noise = sqrt(var)*noiseq;
@@ -129,7 +130,7 @@ for j=1:length(rates)
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             % Receiver
-            decoded = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
+            [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
             out_decoded = [out_decoded decoded(1:length(frame))];
         end
         % Check
@@ -137,7 +138,8 @@ for j=1:length(rates)
     end
     BERs = cat(2, BERs, BER/n_experiments);
  end
-    semilogy(snr_dbs, BERs);
+    colors(j)
+    semilogy(snr_dbs, BERs, 'color',colors(j));
     hold on;
 end
 
