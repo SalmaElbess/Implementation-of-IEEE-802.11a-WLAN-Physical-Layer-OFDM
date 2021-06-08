@@ -1,4 +1,4 @@
-function [out_decoded, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, estimation_method)
+function [out_decoded, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, equalization_method, Pz)
 %% WiFi_receiver: This function performs all required steps to receive complex symbols and convert them to binary data using WiFi
 % Parameters: 
     % input_stream: the input OFDM complex symbols to received
@@ -7,7 +7,7 @@ function [out_decoded, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guar
 % Returns:
     % out_decoded: the output binary data received
 if nargin < 4
-   estimation_method = 'ZF'; 
+   equalization_method = 'ZF'; 
 end
  %% --(1) Standards Specifications 
 zero_indecies = cat(2, 1, (28:38));   %indecies of zeroes
@@ -25,6 +25,9 @@ gray_scheme_64QAM = [4 5 7 6 2 3 1 0
 recv_with_prefix = reshape(input_stream,Nc + guard_len,[]);
 %Remove cyclic prefix
 recv = recv_with_prefix(guard_len+1:end,:);
+rec_frame_ifft = reshape(recv,1,[]);
+rec_data_ifft = rec_frame_ifft(64*5+1:end);     %it should be the same as (final_data)
+Px = sum(abs(rec_data_ifft).^2)/length(rec_data_ifft);
 %FFT module
 after_fft = fft(recv,[],1);
 %parallel to serial
@@ -44,10 +47,10 @@ end
 
 %% TODO#2: --(3) Channel Estimation
   % --- using rec_preamble
-  channel_gains = estimate_channel(rec_preamble,estimation_method);
+  channel_gains = estimate_channel(rec_preamble);
 %% TODO#3: --(4) Channel Equalization
   % ---
-  rx_data_equalized = equalize_channel(rx_data,channel_gains,estimation_method);
+  rx_data_equalized = equalize_channel(rx_data,channel_gains,equalization_method, Pz, Px);
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
 useful_ind = setdiff([1:64],zero_indecies);
 rec_signal= rec_signal(useful_ind);

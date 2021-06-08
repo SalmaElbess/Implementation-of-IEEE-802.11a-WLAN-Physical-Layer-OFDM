@@ -1,4 +1,4 @@
-function equalized_data = equalize_channel(data,channel_gains,equalization_method)
+function equalized_data = equalize_channel(data,channel_gains,equalization_method, Pz, Px)
 %The function equalize the channel effect on the data given the channel 
 %gains. The function removes the pilots subcarriers and returns the
 %equalized data.
@@ -19,13 +19,14 @@ if strcmpi(equalization_method,'ZF')
     %remove pilots channel gains
 
     data_channel_gains = channel_gains(data_indecies);
-    %equalize data
-    equalized_data = zeros(size(data));
     for i = 1:48:length(data)
         equalized_data(i:i+47) = data(i:i+47)./data_channel_gains;
     end
 else
-    equalized_data=conv(data,conj(channel_gains));
-    equalized_data=equalized_data(1:length(data));
+    data_channel_gains = channel_gains(data_indecies);
+    W = conj(data_channel_gains)./((abs(data_channel_gains)).^2+(Pz/Px));
+    for i = 1:48:length(data)
+        equalized_data(i:i+47) = data(i:i+47).*W;
+    end
 end
 end
