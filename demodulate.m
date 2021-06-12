@@ -1,4 +1,4 @@
-function output_stream = demodulate(input_stream, mod_type, output_type, coding_scheme_vec)
+function [output_stream, demod_samples] = demodulate(input_stream, mod_type, output_type, coding_scheme_vec)
 %% demodulate: This function perform demodulation for input complex symbols with multiple modulation schemes
 % Parameters: 
     % input_stream: modulated complex symbols

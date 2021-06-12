@@ -1,4 +1,4 @@
-function [mapped_stream, additional] = modulate(input_stream, input_type, mod_type, coding_scheme_vec)
+function [mapped_stream, ref_vector] = modulate(input_stream, input_type, mod_type, coding_scheme_vec)
 %% modulate: This function perform modulation for input data (binary or symbols) with multiple modulation schemes
 % Parameters: 
     % input_stream: a row vector of the input data
@@ -33,7 +33,7 @@ else
 end
 
 %  Modulation
-additional = 0; Kmod = 1; %initialization
+ref_vector = 0; Kmod = 1; %initialization
  %-- check if coding scheme is passed
 if nargin < 4
    coding_scheme_vec = -1; %default value in case of no specific coding scheme 
@@ -47,7 +47,7 @@ end
       else
           Kmod = 1/sqrt(42); %IEEE-11.802a standard
       end
-      [mapped_stream, additional] = modulate_QAM(N, stream, Kmod, coding_scheme_vec);
+      [mapped_stream, ref_vector] = modulate_QAM(N, stream, Kmod, coding_scheme_vec);
    elseif strcmpi(mod_type, 'BPSK')
       mapped_stream = stream; 
       mapped_stream(mapped_stream == 0) = -1;

@@ -1,4 +1,4 @@
-function with_cyclic_guards = WiFi_transmitter(bin_data, mod_type, rate, Nc, guard_len)
+function [with_cyclic_guards, temp_data] = WiFi_transmitter(bin_data, mod_type, rate, Nc, guard_len)
 %% WiFi_transmitter: This function performs all required steps to transmit binary data using WiFi
 % Parameters: 
     % bin_data: a row vector of the binary input data
@@ -18,8 +18,17 @@ data_indecies = setdiff(setdiff((1:Nc), pilots_indecies), zero_indecies);
 %input_length = length(bin_data);
 [temp_preamble, temp_signal, temp_data] = construct_frame(bin_data, mod_type, rate);
 
+    
 %% --(3) Preamble & Signal post-processing
-temp_preamble = reshape(temp_preamble,[],4).'; 
+temp_preamble = reshape(temp_preamble,[],4).';
+
+% ---add_noise
+% preamble_powers = sum(abs(temp_preamble).^2,2)/52;
+% No_preamble = preamble_powers./(log2(2)*snr);
+% noiseq = (randn(size(temp_preamble)) + 1j*randn(size(temp_preamble))) .* sqrt(No_preamble/2);
+%noise_power = sum(abs(noiseq).^2)/length(noiseq);
+%temp_preamble = temp_preamble + noiseq;
+
 preamble = zeros(4,64); signal = zeros(1,64);
 
 rest_indecies = setdiff((1:64), zero_indecies);
@@ -31,7 +40,17 @@ signal(rest_indecies) = temp_signal;
 %% --(4) Data post-processing
 n_data = length(data_indecies);
 % -- padding
+
 data = padarray(temp_data, [0, n_data-ceil(rem(length(temp_data),n_data))], 0, 'post');
+temp_data = data;
+
+% -- add_noise
+% data_power = sum(abs(temp_data).^2)/length(temp_data);
+% No_data = data_power/(log2(64)*snr);
+% noiseq = (randn(1,length(temp_data)) + 1j*randn(1,length(temp_data))) * sqrt(No_data/2);
+% noise_power = sum(abs(noiseq).^2)/length(noiseq);
+% %temp_data = temp_data + noiseq;
+
 tx_pilots = data(randperm(n_data, length(pilots_indecies)));
 % -- add pilots
 data = conj(reshape(data,n_data,[])');

@@ -1,4 +1,4 @@
-function [out_decoded, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, equalization_method, Pz)
+function [out_decoded, rx_data, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, equalization_method)
 %% WiFi_receiver: This function performs all required steps to receive complex symbols and convert them to binary data using WiFi
 % Parameters: 
     % input_stream: the input OFDM complex symbols to received
@@ -25,9 +25,6 @@ gray_scheme_64QAM = [4 5 7 6 2 3 1 0
 recv_with_prefix = reshape(input_stream,Nc + guard_len,[]);
 %Remove cyclic prefix
 recv = recv_with_prefix(guard_len+1:end,:);
-rec_frame_ifft = reshape(recv,1,[]);
-rec_data_ifft = rec_frame_ifft(64*5+1:end);     %it should be the same as (final_data)
-Px = sum(abs(rec_data_ifft).^2)/length(rec_data_ifft);
 %FFT module
 after_fft = fft(recv,[],1);
 %parallel to serial
@@ -50,7 +47,7 @@ end
   channel_gains = estimate_channel(rec_preamble);
 %% TODO#3: --(4) Channel Equalization
   % ---
-  rx_data_equalized = equalize_channel(rx_data,channel_gains,equalization_method, Pz, Px);
+  rx_data_equalized = equalize_channel(rx_data,channel_gains,equalization_method);
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
 useful_ind = setdiff([1:64],zero_indecies);
 rec_signal= rec_signal(useful_ind);
@@ -94,9 +91,8 @@ switch R
 end
 %% --(6) Data symbols demapping and Padding removal
 
-out_coded = demodulate(rx_data_equalized, mod_type, 'binary', gray_scheme);
-out_coded = out_coded(1:8*rx_length/rx_rate); % Padding removal
-
+[out_coded, demoded_data] = demodulate(rx_data_equalized, mod_type, 'binary', gray_scheme);
+out_coded = out_coded(1:ceil(8*rx_length/rx_rate)); % Padding removal
  %% --(7) Viterbi Decoding  
 out_decoded = viterbi_decoder(out_coded,rx_rate);
 end

@@ -1,4 +1,4 @@
-function equalized_data = equalize_channel(data,channel_gains,equalization_method, Pz, Px)
+function equalized_data = equalize_channel(data,channel_gains,equalization_method)
 %The function equalize the channel effect on the data given the channel 
 %gains. The function removes the pilots subcarriers and returns the
 %equalized data.
@@ -12,6 +12,11 @@ function equalized_data = equalize_channel(data,channel_gains,equalization_metho
 %output:
 %       equalized_data: array of equalized data. Each OFDM symbol isnside
 %       this array is 48 subcarrier long.
+global data_power
+global noise_power
+global M
+data_power = data_power;
+
 
 pilots_indecies = [32, 45, 7, 21];
 data_indecies = setdiff((1:52), pilots_indecies);
@@ -24,7 +29,7 @@ if strcmpi(equalization_method,'ZF')
     end
 else
     data_channel_gains = channel_gains(data_indecies);
-    W = conj(data_channel_gains)./((abs(data_channel_gains)).^2+(Pz/Px));
+    W = conj(data_channel_gains)./((abs(data_channel_gains)).^2+(noise_power/(data_power/log2(M))));
     for i = 1:48:length(data)
         equalized_data(i:i+47) = data(i:i+47).*W;
     end

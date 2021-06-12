@@ -18,6 +18,8 @@ rest_indecies = setdiff((1:64), zero_indecies);
 %get the long recieved preamble symbols
 long_rec_preamble_1 = rec_preamble(rest_indecies + 64*2);
 long_rec_preamble_2 = rec_preamble(rest_indecies + 64*3);
+
+
 %estimate from the first long recieved preamble symbol
 h1 = long_rec_preamble_1./L; 
 %estimate from the second long recieved preamble symbol
