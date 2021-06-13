@@ -1,4 +1,4 @@
-function [with_cyclic_guards, temp_data] = WiFi_transmitter(bin_data, mod_type, rate, Nc, guard_len)
+function with_cyclic_guards= WiFi_transmitter(bin_data, mod_type, rate, Nc, guard_len,imp_type)
 %% WiFi_transmitter: This function performs all required steps to transmit binary data using WiFi
 % Parameters: 
     % bin_data: a row vector of the binary input data
@@ -72,4 +72,8 @@ after_ifft = ifft(parallel_frame,[],1);
 with_cyclic_guards = [after_ifft(Nc-guard_len+1:end,:);after_ifft];
 %parallel to serial conversion  
 with_cyclic_guards = reshape(with_cyclic_guards,1,[]);
+%fixed point 
+if strcmpi(imp_type,'Fixed')
+with_cyclic_guards = fi(with_cyclic_guards,1,8,8);
+end
 end

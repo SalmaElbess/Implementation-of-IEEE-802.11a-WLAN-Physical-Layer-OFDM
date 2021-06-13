@@ -1,4 +1,4 @@
-function [out_decoded, rx_data, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, equalization_method)
+function [out_decoded, rx_data, rx_data_equalized] = WiFi_receiver(input_stream, Nc, guard_len, equalization_method,imp_type)
 %% WiFi_receiver: This function performs all required steps to receive complex symbols and convert them to binary data using WiFi
 % Parameters: 
     % input_stream: the input OFDM complex symbols to received
@@ -25,8 +25,13 @@ gray_scheme_64QAM = [4 5 7 6 2 3 1 0
 recv_with_prefix = reshape(input_stream,Nc + guard_len,[]);
 %Remove cyclic prefix
 recv = recv_with_prefix(guard_len+1:end,:);
+if strcmpi(imp_type,'Fixed')
+    %Fixed to floating
+    recv = recv.data;
+end
 %FFT module
 after_fft = fft(recv,[],1);
+
 %parallel to serial
 rec_frame = reshape(after_fft,1,[]);  %it should be the same as (frame)
 % Separate preamble, signal, data
@@ -41,13 +46,17 @@ for i=1:size(rec_data,1)
    rx_pilots = cat(1,rx_pilots,rec_data(i, pilots_indecies)); 
    rx_data =  cat(2,rx_data, rec_data(i, data_indecies));  % multiple of 48 now
 end
-
+if strcmpi(imp_type,'Fixed')
+%Floating to Fixed 
+rx_data= fi(rx_data,1,20,20);
+rec_preamble= fi(rec_preamble,1,18,15);
+end
 %% TODO#2: --(3) Channel Estimation
   % --- using rec_preamble
   channel_gains = estimate_channel(rec_preamble);
 %% TODO#3: --(4) Channel Equalization
   % ---
-  rx_data_equalized = equalize_channel(rx_data,channel_gains,equalization_method);
+  rx_data_equalized = equalize_channel(rx_data,channel_gains,equalization_method,imp_type);
  %% TODO#4: --(5) Extract data_length , rate from signal & use them to eliminate the padding
 useful_ind = setdiff([1:64],zero_indecies);
 rec_signal= rec_signal(useful_ind);
@@ -91,7 +100,7 @@ switch R
 end
 %% --(6) Data symbols demapping and Padding removal
 
-[out_coded, demoded_data] = demodulate(rx_data_equalized, mod_type, 'binary', gray_scheme);
+[out_coded, demoded_data] = demodulate(rx_data_equalized, mod_type, 'binary', gray_scheme,imp_type);
 out_coded = out_coded(1:ceil(8*rx_length/rx_rate)); % Padding removal
  %% --(7) Viterbi Decoding  
 out_decoded = viterbi_decoder(out_coded,rx_rate);

@@ -31,13 +31,13 @@ rate= 3/4; mod_type = '16QAM'; estimation_method = 'WE'; M = 16;
 for i=1:step:length(data)
     frame = data(i:min(length(data),i+step-1)); 
     % Tansmitter
-    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
     % Channel
     Rx_frame = conv(tx_frame,conj(h));
     Rx_frame = Rx_frame(1:end-length(h)+1);
     noise_power = 0;
     % Receiver
-    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method);
     out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
 end
 % Check
@@ -59,7 +59,7 @@ out_decoded_WE=[]; out_decoded_ZF=[];
     for i=1:step:length(data)
             frame = data(i:min(length(data),i+step-1)); 
             % Tansmitter
-            tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+            [tx_frame, ~] = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             
@@ -92,8 +92,8 @@ out_decoded_WE=[]; out_decoded_ZF=[];
             Rx_frame = [preamble_part, signal_part, data_part];
            
             % Receiver 
-            [decoded_WE, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE','Float');
-            [decoded_ZF, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF','Float');
+            [decoded_WE, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
+            [decoded_ZF, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
             out_decoded_WE = cat(2, out_decoded_WE, decoded_WE(1:length(frame)));
             out_decoded_ZF = cat(2, out_decoded_ZF, decoded_ZF(1:length(frame)));
     end
@@ -117,7 +117,7 @@ symbols_WE=[]; symbols_ZF=[]; symbols_recv=[];
     for i=1:step:0.01*length(data)
             frame = data(i:min(length(data),i+step-1)); 
             % Tansmitter
-            tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+            [tx_frame, data_freq] = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             
@@ -151,8 +151,8 @@ symbols_WE=[]; symbols_ZF=[]; symbols_recv=[];
             Rx_frame = [preamble_part, signal_part, data_part];
            
             % Receiver 
-            [~,rx_syms, rx_syms_WE] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE','Float');
-            [decoded_ZF, rx_syms, rx_syms_ZF] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF','Float');
+            [~,rx_syms, rx_syms_WE] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
+            [decoded_ZF, rx_syms, rx_syms_ZF] = WiFi_receiver(Rx_frame, Nc, guard_len, 'ZF');
             symbols_WE = cat(2, symbols_WE, rx_syms_WE);
             symbols_ZF = cat(2, symbols_ZF, rx_syms_ZF);
             symbols_recv = cat(2, symbols_recv, rx_syms);
@@ -190,7 +190,7 @@ for j=1:length(rates)
     for i=1:step:length(data)
             frame = data(i:min(length(data),i+step-1)); 
             % Tansmitter
-            tx_frame= WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+            [tx_frame, ~] = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len);
             Rx_frame = conv(tx_frame,conj(h));
             Rx_frame = Rx_frame(1:end-length(h)+1);
             
@@ -223,7 +223,7 @@ for j=1:length(rates)
             Rx_frame = [preamble_part, signal_part, data_part];
            
             % Receiver 
-            [decoded_WE, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE','Float');
+            [decoded_WE, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, 'WE');
             out_decoded_WE = cat(2, out_decoded_WE, decoded_WE(1:length(frame)));
     end
    BER_WE = sum(out_decoded_WE ~= data)/length(out_decoded_WE);
