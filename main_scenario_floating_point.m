@@ -16,14 +16,154 @@ h = [0.8208 + 0.2052*1i, 0.4104 + 0.1026*1i, 0.2052 + 0.2052*1i, 0.1026 + 0.1026
 
 FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  
 %Reading the file
-data=[];
+data_in=[];
 while ~feof(FileID)
-    data=[data fscanf(FileID,'%c')];                      %read the text file char by char
+    data_in=[data_in fscanf(FileID,'%c')];                      %read the text file char by char
 end
 fclose(FileID);
-data = reshape(dec2bin(data, 8).'-'0',1,[]);
+data = reshape(dec2bin(data_in, 8).'-'0',1,[]);
 
-%% Without AWGN
+%% Without AWGN (BPSK code_rate = 1/2)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 1/2; mod_type = 'BPSK'; estimation_method = 'WE'; M = 2;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (BPSK code_rate = 3/4)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 3/4; mod_type = 'BPSK'; estimation_method = 'WE'; M = 2;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (QPSK code_rate = 1/2)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 1/2; mod_type = 'QPSK'; estimation_method = 'WE'; M = 4;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (QPSK code_rate = 3/4)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 3/4; mod_type = 'QPSK'; estimation_method = 'WE'; M = 4;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (16-QAM code_rate = 1/2)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 1/2; mod_type = '16QAM'; estimation_method = 'WE'; M = 16;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (16-QAM code_rate = 3/4)
 data_power = 1;
 out_decoded=[];
 step = 1032*8;
@@ -40,12 +180,72 @@ for i=1:step:length(data)
     [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
     out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
 end
-% Check
+% Check using BER
 BER = sum(out_decoded ~= data)/length(out_decoded)
 % Write in file
 FileID=fopen('rec_test_file_1.txt','w');
-fprintf(FileID,'%c',char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
 fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (64-QAM code_rate = 2/3)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 2/3; mod_type = '64QAM'; estimation_method = 'WE'; M = 64;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
+
+%% Without AWGN (64-QAM code_rate = 3/4)
+data_power = 1;
+out_decoded=[];
+step = 1032*8;
+rate= 3/4; mod_type = '64QAM'; estimation_method = 'WE'; M = 64;
+for i=1:step:length(data)
+    frame = data(i:min(length(data),i+step-1)); 
+    % Tansmitter
+    tx_frame = WiFi_transmitter(frame, mod_type, rate, Nc, guard_len,'Float');
+    % Channel
+    Rx_frame = conv(tx_frame,conj(h));
+    Rx_frame = Rx_frame(1:end-length(h)+1);
+    noise_power = 0;
+    % Receiver
+    [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
+    out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
+end
+% Check using BER
+BER = sum(out_decoded ~= data)/length(out_decoded)
+% Write in file
+FileID=fopen('rec_test_file_1.txt','w');
+data_out = char(bin2dec(reshape(char(out_decoded+'0'), 8,[]).'))';
+fprintf(FileID,'%c',data_out);
+fclose(FileID);
+
+% check using the data itself
+number_of_charachters_errors = sum(data_in ~= data_out)
 
 %% 4.b) Comaprison of BER perfomance with ZF equalizer and Weiner equalizer
 
@@ -242,5 +442,21 @@ hold off;
 grid on;
 
   
+%% To check
+FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  
+%Reading the file
+data_tx=[];
+while ~feof(FileID)
+    data_tx=[data_tx fscanf(FileID,'%c')];                      %read the text file char by char
+end
+fclose(FileID);
+
+FileID=fopen('test_file_1.txt','r');                       %open the file in read mode                                                                  
+%Reading the file
+data_rx=[];
+while ~feof(FileID)
+    data_rx=[data_rx fscanf(FileID,'%c')];                      %read the text file char by char
+end
+fclose(FileID);
 
 
