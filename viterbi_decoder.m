@@ -19,6 +19,10 @@ switch CR
         out_decoded = vitdec(encoded,trellis,2*tbdepth,'trunc','hard',punctpat);
     case 2/3
         punctpat = [1 1 1 0];
+        if rem(length(encoded), sum(punctpat))
+            padding = sum(punctpat) - rem(length(encoded), sum(punctpat));
+            encoded = [encoded zeros(1,padding)];
+        end
         out_decoded = vitdec(encoded,trellis,2*tbdepth,'trunc','hard',punctpat);
 end
 
