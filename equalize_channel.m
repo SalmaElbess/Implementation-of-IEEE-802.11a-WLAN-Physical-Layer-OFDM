@@ -36,7 +36,7 @@ else
     if strcmpi(imp_type,'Fixed')
         W = divide(numerictype(data_channel_gains),conj(data_channel_gains),((abs(data_channel_gains)).^2+(noise_power.data/(data_power.data/log2(M)))));
         for i = 1:48:length(data)
-        equalized_data(i:i+47) = divide(numerictype(data_channel_gains), data(i:i+47),W);
+        equalized_data(i:i+47) = data(i:i+47).*W;
         end
     else
         W = conj(data_channel_gains)./((abs(data_channel_gains)).^2+(noise_power/(data_power/log2(M))));
