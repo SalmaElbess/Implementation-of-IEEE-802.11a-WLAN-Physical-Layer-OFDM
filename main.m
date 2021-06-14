@@ -265,8 +265,8 @@ for i=1:step:length(data)
     % Receiver
     [decoded, ~] = WiFi_receiver(Rx_frame, Nc, guard_len, estimation_method,'Float');
     out_decoded = cat(2, out_decoded, decoded(1:length(frame)));
-    noise_power = fi(noise_power,1,5,2)
-    data_power = fi(data_power,1,5,2)
+    noise_power = fi(noise_power,1,5,2);
+    data_power = fi(data_power,1,5,2);
     [decoded_fixed, ~] = WiFi_receiver(Rx_frame_fixed, Nc, guard_len, estimation_method,'Fixed');
     out_decoded_fixed = cat(2, out_decoded_fixed, decoded_fixed(1:length(frame)));
 end
@@ -341,7 +341,7 @@ end
 %% 4.c) Constellation diagram of the received symbols after equalization using the ZF equalizer and weiner equalizer
 
 step = 1032*8;
-snr_db = 21; snr = 10.^(snr_db/10);
+snr_db = 7; snr = 10.^(snr_db/10);
 rate= 3/4; mod_type = '64QAM'; M = 64;
 
 symbols_WE=[]; symbols_ZF=[]; symbols_recv=[];
@@ -576,8 +576,9 @@ end
     semilogy(snr_dbs, BERs_WE, 'color',colors(j));
     hold on;
 end
+hold off
 %% 4.f) Comparison between the BER performance of all supported rates using the Fixed-point implementation.
-
+step = 1032*8;
 snr_dbs = (1:1:10); snrs = 10.^(snr_dbs/10);
 rates= [1/2, 3/4, 1/2, 3/4, 1/2, 3/4, 2/3, 3/4];
 mod_types = ["BPSK","BPSK","QPSK", "QPSK", "16QAM", "16QAM", "64QAM", "64QAM"];
