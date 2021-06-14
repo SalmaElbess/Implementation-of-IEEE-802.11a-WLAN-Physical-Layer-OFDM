@@ -48,8 +48,8 @@ for i=1:size(rec_data,1)
 end
 if strcmpi(imp_type,'Fixed')
 %Floating to Fixed 
-rx_data= fi(rx_data,1,20,20);
-rec_preamble= fi(rec_preamble,1,18,15);
+rx_data= fi(rx_data,1,16,12);
+rec_preamble= fi(rec_preamble,1,16,12);
 end
 %% TODO#2: --(3) Channel Estimation
   % --- using rec_preamble
